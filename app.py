@@ -52,17 +52,19 @@ if fetch_trigger and ticker_input:
         except Exception as e:
             st.error(f"❌ Failed to fetch SEC data: {str(e)}")
 
-# Display SEC Summary Cards & Clickable Raw Data Inspector
+# Display SEC Summary Cards (Vertical Stacking)
 if st.session_state['sec_data']:
     data = st.session_state['sec_data']
     st.success(f"📌 Selected Target: **{data['Ticker']}** (CIK: {data['CIK']})")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Revenue (TTM)", f"${data['营业收入 (Revenue)'] / 1e6:,.2f} M")
-    m2.metric("Operating Cash Flow (OCF)", f"${data['经营活动现金流 (OCF)'] / 1e6:,.2f} M")
-    m3.metric("Cash & Equivalents", f"${data['现金及现金等价物 (Cash)'] / 1e6:,.2f} M")
-    m4.metric("Long-term Debt", f"${data['长期债务 (Long-term Debt)'] / 1e6:,.2f} M")
+    
+    # 🌟 竖向排列：SEC 基础财务指标
+    st.markdown("##### **SEC Key Financial Metrics (Vertical View)**")
+    st.metric("Revenue (TTM)", f"${data['营业收入 (Revenue)'] / 1e6:,.2f} M")
+    st.metric("Operating Cash Flow (OCF)", f"${data['经营活动现金流 (OCF)'] / 1e6:,.2f} M")
+    st.metric("Cash & Equivalents", f"${data['现金及现金等价物 (Cash)'] / 1e6:,.2f} M")
+    st.metric("Long-term Debt", f"${data['长期债务 (Long-term Debt)'] / 1e6:,.2f} M")
 
-    # 🌟 新增：可点击展开查看完整的 SEC EDGAR 原始与结构化数据
+    # 可点击展开查看完整的 SEC EDGAR 原始与结构化数据
     with st.expander("📄 **View Complete Downloaded SEC EDGAR Data (点击展开/查看完整 SEC 抓取数据)**", expanded=False):
         st.markdown("##### **Structured Financial Facts Table**")
         sec_table_data = []
@@ -188,20 +190,21 @@ with tab1:
             'per_share': per_share
         }
 
-    # Persistent Display of FMV Results & Step-by-Step Breakdown
+    # Persistent Display of FMV Results (Vertical Stacking)
     if st.session_state['dcf_results']:
         res = st.session_state['dcf_results']
         st.divider()
         st.markdown("### 🎯 Final Valuation Results (Fair Market Value)")
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("PV of Discrete Cash Flows", f"${res['sum_pv_fcff'] / 1e6:,.2f} M")
-        c2.metric("PV of Terminal Value (PV of TV)", f"${res['pv_tv'] / 1e6:,.2f} M")
-        c3.metric("Enterprise Value (EV)", f"${res['final_ev'] / 1e6:,.2f} M")
+        
+        # 🌟 竖向排列：估值结果指标
+        st.metric("PV of Discrete Cash Flows", f"${res['sum_pv_fcff'] / 1e6:,.2f} M")
+        st.metric("PV of Terminal Value (PV of TV)", f"${res['pv_tv'] / 1e6:,.2f} M")
+        st.metric("Enterprise Value (EV)", f"${res['final_ev'] / 1e6:,.2f} M")
         
         if res['per_share'] is not None:
-            c4.metric("Intrinsic Value per Share (FMV)", f"${res['per_share']:,.2f} / share")
+            st.metric("Intrinsic Value per Share (FMV)", f"${res['per_share']:,.2f} / share")
         else:
-            c4.metric("Assessed Total Value (FMV)", f"${res['final_ev'] / 1e6:,.2f} M")
+            st.metric("Assessed Total Value (FMV)", f"${res['final_ev'] / 1e6:,.2f} M")
 
         # -----------------------------------------------------------------------------
         # 🔍 Step-by-Step Calculation Breakdown Web Section
