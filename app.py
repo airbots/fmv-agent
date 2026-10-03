@@ -19,8 +19,8 @@ def get_image_base64(file_path: str) -> str:
   return ""
 
 
-aurorain_icon_b64 = get_image_base64("Aurorain_icon.png")
-aurorain_logo_b64 = get_image_base64("Aurorain.png")
+aurorain_icon_b64 = get_image_base64("Aurorain.png")
+aurorain_logo_b64 = get_image_base64("Aurorain_icon.png")
 
 
 # -----------------------------------------------------------------------------
