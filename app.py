@@ -66,7 +66,7 @@ if aurorain_icon_b64:
             top: 14px;
             left: 20px;
             z-index: 999999;
-            height: 40px;
+            height: 120px;
             width: auto;
             object-fit: contain;
         }}
@@ -84,8 +84,8 @@ if aurorain_logo_b64:
   st.markdown(
       f"""
         <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 10px; margin-bottom: 10px;">
-            <img src="data:image/png;base64,{aurorain_logo_b64}" style="height: 55px; width: auto; object-fit: contain;" alt="Aurorain Logo">
-            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #0A1E4B;">
+            <img src="data:image/png;base64,{aurorain_logo_b64}" style="height: 110px; width: auto; object-fit: contain;" alt="Aurorain Logo">
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #FFFFFF;">
                 Multi-Instrument Financial Valuation Engine
             </h1>
         </div>
