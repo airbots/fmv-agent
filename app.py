@@ -5,11 +5,12 @@ import numpy as np
 import numpy_financial as npf
 import pandas as pd
 import streamlit as st
+import yfinance as yf
 from sec_fetcher import SECValuationFetcher
 
 
 # -----------------------------------------------------------------------------
-# Helper: Base64 Image Loader for Streamlit Cloud Deployment
+# Helper: Base64 Image Loader for Streamlit Deployment
 # -----------------------------------------------------------------------------
 def get_image_base64(file_path: str) -> str:
   """Reads a local image file and converts it to base64 for HTML rendering."""
@@ -19,8 +20,59 @@ def get_image_base64(file_path: str) -> str:
   return ""
 
 
-aurorain_icon_b64 = get_image_base64("Aurorain.png")
-aurorain_logo_b64 = get_image_base64("Aurorain_icon.png")
+aurorain_icon_b64 = get_image_base64("Aurorain_icon.png")
+aurorain_logo_b64 = get_image_base64("Aurorain.png")
+
+
+# -----------------------------------------------------------------------------
+# Dynamic Real-time Aurorain Risk Factor Fetcher (R_2000 / R_current)
+# -----------------------------------------------------------------------------
+@st.cache_data(ttl=3600)
+def fetch_aurorain_risk_factor():
+  """Fetches live S&P 500 P/E and 10-Yr US Treasury Yield to calculate Aurorain Risk Factor (R_2000 / R_current)."""
+  try:
+    # 1. Fetch S&P 500 (^GSPC) Trailing P/E
+    sp500 = yf.Ticker("^GSPC")
+    sp500_info = sp500.info
+    pe = sp500_info.get("trailingPE", 26.5)
+    sp500_ey = (1.0 / pe) * 100.0  # Percentage
+
+    # 2. Fetch 10-Yr US Treasury Yield (^TNX)
+    tnx = yf.Ticker("^TNX")
+    tnx_hist = tnx.history(period="5d")
+    us10y = (
+        tnx_hist["Close"].iloc[-1] if not tnx_hist.empty else 3.85
+    )  # Percentage
+
+    # 3. Calculate R_2000 / R_current
+    # March 2000 Benchmark Ratio (3.39% / 6.20% = 0.5468)
+    march_2000_ratio = 0.5468
+    current_ratio = sp500_ey / us10y
+
+    # 正确公式：R_2000 / R_current (数值越大风险越高)
+    risk_factor = march_2000_ratio / current_ratio
+
+    return {
+        "risk_factor": risk_factor,
+        "sp500_pe": pe,
+        "sp500_ey": sp500_ey,
+        "us10y": us10y,
+        "current_ratio": current_ratio,
+        "status": "live",
+    }
+  except Exception as e:
+    fallback_pe = 26.5
+    fallback_ey = (1.0 / fallback_pe) * 100.0
+    fallback_10y = 3.85
+    curr_r = fallback_ey / fallback_10y
+    return {
+        "risk_factor": 0.5468 / curr_r,
+        "sp500_pe": fallback_pe,
+        "sp500_ey": fallback_ey,
+        "us10y": fallback_10y,
+        "current_ratio": curr_r,
+        "status": "fallback",
+    }
 
 
 # -----------------------------------------------------------------------------
@@ -46,32 +98,41 @@ def black_scholes(S, K, T, r, sigma, option_type="call"):
 
 
 # -----------------------------------------------------------------------------
-# 1. Page Configuration & Top-Left Logo Styling
+# 1. Page Configuration & Navigation Styling
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Offline Financial Valuation Workbench",
+    page_title="Aurorain Financial Valuation Engine",
     page_icon="Aurorain_icon.png"
     if os.path.exists("Aurorain_icon.png")
     else "📈",
     layout="wide",
 )
 
-# 1.1 Inject CSS for Floating Top-Left Icon (Aurorain_icon.png)
+# 1.1 Inject CSS for Floating Top-Left Icon
 if aurorain_icon_b64:
   st.markdown(
       f"""
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 14px;
-            left: 20px;
-            z-index: 999999;
-            height: 120px;
+            top: 12px;
+            left: 60px;
+            z-index: 999;
+            height: 36px;
             width: auto;
             object-fit: contain;
+            pointer-events: none;
         }}
         .block-container {{
             padding-top: 3.5rem !important;
+        }}
+        .risk-card {{
+            background: linear-gradient(135deg, #0a1e4b 0%, #1e3a7b 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
         }}
         </style>
         <img src="data:image/png;base64,{aurorain_icon_b64}" class="top-left-logo" alt="Aurorain Icon">
@@ -83,9 +144,9 @@ if aurorain_icon_b64:
 if aurorain_logo_b64:
   st.markdown(
       f"""
-        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 10px; margin-bottom: 10px;">
-            <img src="data:image/png;base64,{aurorain_logo_b64}" style="height: 110px; width: auto; object-fit: contain;" alt="Aurorain Logo">
-            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #FFFFFF;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 5px; margin-bottom: 10px;">
+            <img src="data:image/png;base64,{aurorain_logo_b64}" style="height: 52px; width: auto; object-fit: contain;" alt="Aurorain Logo">
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #0A1E4B;">
                 Multi-Instrument Financial Valuation Engine
             </h1>
         </div>
@@ -108,9 +169,70 @@ if "dcf_results" not in st.session_state:
   st.session_state["dcf_results"] = None
 
 # -----------------------------------------------------------------------------
-# 2. Main Header: Ticker Search Input
+# 2. Hero Banner: Live Aurorain Risk Factor Dashboard (Corrected Ratio)
 # -----------------------------------------------------------------------------
-st.markdown("---")
+risk_data = fetch_aurorain_risk_factor()
+rf_val = risk_data["risk_factor"]
+
+# 更新预警逻辑：数值越大代表风险越高
+if rf_val >= 1.0:
+  status_color = "#FF4D4D"  # Red
+  status_text = "🚨 极高风险 (已超越2000年泡沫极值)"
+elif rf_val >= 0.75:
+  status_color = "#FFC107"  # Yellow
+  status_text = "⚠️ 中度风险 (股权风险溢价偏紧)"
+else:
+  status_color = "#00EEDC"  # Cyan/Green
+  status_text = "✅ 相对安全 (风险缓冲充裕)"
+
+st.markdown(
+    f"""
+<div class="risk-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div>
+            <span style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8;">
+                全球大盘估值风险基准 | Global Macro Market Risk Index
+            </span>
+            <h2 style="margin: 5px 0 0 0; font-size: 2.4rem; font-weight: 800; color: #FFFFFF;">
+                Aurorain Risk Factor: <span style="color: {status_color};">{rf_val:.3f}x</span>
+            </h2>
+        </div>
+        <div style="text-align: right; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 8px;">
+            <div style="font-size: 1.1rem; font-weight: 700; color: {status_color};">{status_text}</div>
+            <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">基准参照: 2000年3月科技泡沫顶峰 (1.000x)</div>
+        </div>
+    </div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+with st.expander("ℹ️ **查看 Aurorain Risk Factor 实时计算公式与参数明细**"):
+  st.latex(
+      r"\text{Aurorain Risk Factor} = \frac{\left( \frac{\text{S\&P 500"
+      r" Earnings Yield}}{\text{10-Yr Treasury Yield}} \right)_{\text{March"
+      r" 2000}}}{\left( \frac{\text{S\&P 500 Earnings Yield}}{\text{10-Yr"
+      r" Treasury Yield}} \right)_{\text{Live}}}"
+  )
+
+  c_rf1, c_rf2, c_rf3, c_rf4 = st.columns(4)
+  c_rf1.metric(
+      "S&P 500 Trailing P/E", f"{risk_data['sp500_pe']:.2f}x"
+  )
+  c_rf2.metric(
+      "S&P 500 Earnings Yield", f"{risk_data['sp500_ey']:.2f}%"
+  )
+  c_rf3.metric("10-Yr Treasury Yield", f"{risk_data['us10y']:.2f}%")
+  c_rf4.metric("Live Yield Ratio (R_current)", f"{risk_data['current_ratio']:.3f}")
+
+  st.caption(
+      "注：2000年3月崩盘顶点标普 500 P/E 约 29.5 (Earnings Yield 3.39%)，10年美债收益率 6.20%，对应基准比率 R_2000 为"
+      " 0.5468。Factor >= 1.0 代表当前股市相对债市的昂贵程度已超越 2000 年泡沫顶峰。"
+  )
+
+# -----------------------------------------------------------------------------
+# 3. Main Header: Ticker Search Input
+# -----------------------------------------------------------------------------
 col_search, col_btn = st.columns([4, 1])
 
 with col_search:
@@ -124,7 +246,7 @@ with col_search:
   ).upper()
 
 with col_btn:
-  st.write("")  # Vertical alignment padding
+  st.write("")
   st.write("")
   fetch_trigger = st.button(
       "📥 Fetch SEC Data", type="primary", use_container_width=True
@@ -147,7 +269,7 @@ if fetch_trigger and ticker_input:
     except Exception as e:
       st.error(f"❌ Failed to fetch SEC data: {str(e)}")
 
-# Display SEC Summary Metrics (Vertical View)
+# Display SEC Summary Metrics
 if st.session_state["sec_data"]:
   data = st.session_state["sec_data"]
   st.success(
@@ -191,10 +313,10 @@ if st.session_state["sec_data"]:
 st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 3. Sidebar: Model Engine & Discounting Parameters
+# 4. Sidebar: Model Engine & Discounting Parameters
 # -----------------------------------------------------------------------------
 with st.sidebar:
-  st.header("⚙️️ Engine & Valuation Settings")
+  st.header("⚙ Engine & Valuation Settings")
 
   selected_model = st.selectbox(
       "Base LLM Reasoning Engine",
@@ -228,7 +350,7 @@ with st.sidebar:
   is_unlisted = st.checkbox("Private Company (Apply DLOM)", value=False)
 
 # -----------------------------------------------------------------------------
-# 4. Main Navigation Tabs (Each Asset Class in a Dedicated Tab)
+# 5. Main Navigation Tabs
 # -----------------------------------------------------------------------------
 (
     tab_dcf,
@@ -247,7 +369,7 @@ with st.sidebar:
     "🤝 Earnout Valuation",
     "⏳ Forward Contract",
     "👑 Preferred Stock",
-    "秤 Capital Structure",
+    "⚖️ Capital Structure",
     "📄 PDF Parser",
     "📉 Sensitivity Matrix",
 ])
@@ -521,7 +643,6 @@ with tab_note:
   if st.button("📐 Compute Convertible Note Settlement", type="primary"):
     accrued_principal = cn_principal * (1 + cn_interest * cn_years)
 
-    # Effective Conversion Cap Price vs Discount Price
     price_cap = cn_cap / cn_pre_shares
     price_next_round = cn_next_round_val / cn_pre_shares
     price_discount = price_next_round * (1 - cn_discount)
