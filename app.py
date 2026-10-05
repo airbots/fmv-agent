@@ -49,7 +49,7 @@ def fetch_aurorain_risk_factor():
     march_2000_ratio = 0.5468
     current_ratio = sp500_ey / us10y
 
-    # 正确公式：R_2000 / R_current (数值越大风险越高)
+    # R_2000 / R_current (数值越大风险越高)
     risk_factor = march_2000_ratio / current_ratio
 
     return {
@@ -140,13 +140,13 @@ if aurorain_icon_b64:
       unsafe_allow_html=True,
   )
 
-# 1.2 Main Page Header Title with Aurorain.png Logo
+# 1.2 Main Page Header Title with Aurorain.png Logo (自动高对比度配色)
 if aurorain_logo_b64:
   st.markdown(
       f"""
         <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 5px; margin-bottom: 10px;">
             <img src="data:image/png;base64,{aurorain_logo_b64}" style="height: 52px; width: auto; object-fit: contain;" alt="Aurorain Logo">
-            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #0A1E4B;">
+            <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: var(--text-color, #1E293B);">
                 Multi-Instrument Financial Valuation Engine
             </h1>
         </div>
@@ -169,12 +169,11 @@ if "dcf_results" not in st.session_state:
   st.session_state["dcf_results"] = None
 
 # -----------------------------------------------------------------------------
-# 2. Hero Banner: Live Aurorain Risk Factor Dashboard (Corrected Ratio)
+# 2. Hero Banner: Live Aurorain Risk Factor Dashboard
 # -----------------------------------------------------------------------------
 risk_data = fetch_aurorain_risk_factor()
 rf_val = risk_data["risk_factor"]
 
-# 更新预警逻辑：数值越大代表风险越高
 if rf_val >= 1.0:
   status_color = "#FF4D4D"  # Red
   status_text = "🚨 极高风险 (已超越2000年泡沫极值)"
