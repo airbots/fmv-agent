@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "fmv-autonomous-platform"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = []
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+dashboard = ["streamlit>=1.35"]
+[tool.setuptools.packages.find]
+include = ["fmv*"]

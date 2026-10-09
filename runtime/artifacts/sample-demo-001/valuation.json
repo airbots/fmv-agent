@@ -1,0 +1,39 @@
+{
+  "task_id": "sample-demo-001",
+  "ticker": "DEMO",
+  "status": "COMPLETED",
+  "verified": "arithmetic only; source data is user supplied",
+  "inputs": {
+    "id": "sample-demo-001",
+    "ticker": "DEMO",
+    "fcf": 100000000,
+    "shares": 50000000,
+    "cash": 20000000,
+    "debt": 10000000,
+    "discount_rate": 0.11,
+    "terminal_growth": 0.025,
+    "growth_rates": [
+      0.08,
+      0.07,
+      0.06,
+      0.05,
+      0.04
+    ],
+    "reference": "SYNTHETIC EXAMPLE — not actual financial data"
+  },
+  "valuation": {
+    "enterprise_value": 1402012891.2899907,
+    "equity_value": 1412012891.2899907,
+    "fair_value_per_share": 28.240257825799812,
+    "explicit_pv": 444761331.78651255,
+    "terminal_pv": 957251559.5034782,
+    "projected_fcf": [
+      108000000.0,
+      115560000.0,
+      122493600.0,
+      128618280.0,
+      133763011.2
+    ]
+  },
+  "risk_analysis": "\n\n**Critique of Financial Model Assumptions for DEMO**\n\n1. **Free Cash Flow (FCF):**\n   - The FCF of $100 million is a significant assumption. It lacks context regarding industry standards or historical performance, making its realism uncertain. Fluctuations in operations and investments could affect this figure.\n\n2. **Shares Outstanding:**\n   - 50 million shares are noted, but potential dilution from stock options isn't considered. Future financing plans that might increase shares aren't addressed, which could impact valuation metrics.\n\n3. **Cash on Hand:**\n   - $20 million in cash seems low compared to FCF. The sufficiency for unexpected expenses or investments is questionable, especially without comparison to industry peers.\n\n4. **Debt:**\n   - $10 million debt is manageable, but terms like interest rates and maturity aren't specified. High-interest debt could affect profitability, and covenants might restrict financial flexibility.\n\n5. **Discount Rate:**\n   - 11% is a reasonable rate, but its derivation isn't clear. Without knowing the cost of equity and debt, it's hard to verify if this rate is appropriate for DEMO.\n\n6. **Terminal Growth Rate:**\n   - 2.5% is low, potentially underestimating future cash flows in high-growth industries. It might be reasonable for mature sectors but lacks justification based on industry context.\n\n7. **Growth Rates:**\n   - A linear decline from 8% to 4% assumes steady growth slowing. Justification based on market projections or historical performance is missing, and competition could affect these rates.\n\n8. **Valuation Method:**\n   - The method isn't specified, making it hard to assess accuracy. Different methods (DCF, relative valuation) yield varied results.\n\n9. **External Factors:**\n   - Market conditions, regulatory changes, and economic trends aren't considered, adding risk to the model's assumptions.\n\n**Conclusion:**\nThe provided figures are a starting point but lack supporting data or context. Strengthening the analysis requires details on how each figure was derived and consideration of external risks not addressed in the current model."
+}

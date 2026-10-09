@@ -215,6 +215,11 @@ tempCodeRunnerFile.py
 # PyPI configuration file
 .pypirc
 
+build/**/__init__.py
+generated/**/__init__.py
+__init__.py
+!src/**/__init__.py
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
