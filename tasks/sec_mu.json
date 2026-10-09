@@ -1,0 +1,15 @@
+{
+  "ticker": "MU",
+  "type": "sec_valuation",
+  "assumptions": {
+    "discount_rate": 0.12,
+    "terminal_growth": 0.03,
+    "growth_rates": [
+      0.1,
+      0.08,
+      0.06,
+      0.04,
+      0.03
+    ]
+  }
+}
