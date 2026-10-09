@@ -20,12 +20,12 @@ def test_db_queue_and_artifacts(tmp_path):
     assert task['id']=='demo'
     assert db.claim() is None
     r=process(db,task,tmp_path/'artifacts','unused',use_llm=False)
-    assert r['status']=='COMPLETED'
-    assert db.tasks()[0]['status']=='COMPLETED'
+    assert r['status']=='COMPLETED_WITH_REVIEW'
+    assert db.tasks()[0]['status']=='COMPLETED_WITH_REVIEW'
     assert (tmp_path/'artifacts/demo/valuation.json').exists()
 
 def test_missing_input_fails(tmp_path):
     db=Store(tmp_path/'s.db')
     db.submit('bad','BAD',{'ticker':'BAD'})
     with pytest.raises(ValueError): process(db,db.claim(),tmp_path/'out','unused',use_llm=False)
-    assert db.tasks()[0]['status']=='FAILED'
+    assert db.tasks()[0]['status']=='REVIEW_REQUIRED'

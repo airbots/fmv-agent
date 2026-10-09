@@ -1,5 +1,6 @@
 from dataclasses import dataclass, asdict
 from typing import Sequence
+import math
 
 @dataclass(frozen=True)
 class Assumptions:
@@ -17,6 +18,8 @@ class ValuationResult:
     projected_fcf: tuple[float, ...]
 
 def dcf(free_cash_flow: float, shares: float, cash: float, debt: float, a: Assumptions) -> ValuationResult:
+    if not all(math.isfinite(float(v)) for v in (free_cash_flow, shares, cash, debt, a.discount_rate, a.terminal_growth, *a.growth_rates)):
+        raise ValueError('non-finite DCF input')
     if shares <= 0: raise ValueError('shares must be positive')
     if a.discount_rate <= a.terminal_growth: raise ValueError('discount_rate must exceed terminal_growth')
     if a.discount_rate <= -1: raise ValueError('invalid discount rate')

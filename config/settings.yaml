@@ -1,12 +1,8 @@
 platform:
-  name: Aurorain FMV Autonomous Platform
-  max_parallel_jobs: 1
+  version: "0.2"
   model: deepseek-r1:32b
-  local_only: true
-  automatic_trading: false
-  nightly_local_time: '22:00'
-valuation:
-  source_requirements: explicit
-  missing_values: error
-  max_retry: 0
-  acceptance: numerical_checks_only
+  max_concurrent_jobs: 1
+  sec_cache_ttl_seconds: 21600
+  manual_review_required: true
+  auto_trade: false
+  max_llm_context: 4096

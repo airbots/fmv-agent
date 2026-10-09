@@ -10,4 +10,4 @@ if ! mkdir "$FMV_RUNTIME/.worker-lock" 2>/dev/null; then
   exit 0
 fi
 trap 'rmdir "$FMV_RUNTIME/.worker-lock"' EXIT
-./.venv/bin/python -m fmv.platform.cli run-once
+./.venv/bin/python -m fmv.platform.cli run-pending --max-tasks "${FMV_MAX_NIGHTLY_TASKS:-3}"
